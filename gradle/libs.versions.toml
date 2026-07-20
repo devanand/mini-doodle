@@ -5,6 +5,7 @@ spring-dependency-management = "1.1.7"
 spring-restdocs = "4.0.0"
 asciidoctor = "4.0.5"
 hibernate = "7.4.1.Final"
+spotless = "8.0.0"
 
 [libraries]
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
@@ -31,3 +32,4 @@ junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
 asciidoctor = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
