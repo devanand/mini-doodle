@@ -42,3 +42,6 @@ out/
 
 ### Environment ###
 .env
+
+### Smoke test output - generated on every run ###
+smoke-test-*-failures.log
