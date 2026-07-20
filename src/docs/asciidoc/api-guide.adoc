@@ -1,0 +1,36 @@
+= Mini Doodle API Guide
+:toc: left
+:toclevels: 2
+:source-highlighter: highlightjs
+:sectlinks:
+
+== Overview
+
+Mini Doodle is a meeting scheduling service. Users define available time
+slots on their own calendar; slots can be booked as meetings and cancelled
+back to free. All timestamps are ISO-8601 with an explicit UTC offset -
+timestamps without an offset are rejected.
+
+This page documents the endpoints with behavior worth walking through in
+detail. The full endpoint list, including plain CRUD operations not detailed
+here, is in the project README.
+
+include::user.adoc[]
+
+== Error format
+
+All errors use RFC 7807 Problem Details (`application/problem+json`):
+
+[source,json]
+----
+{
+  "type": "about:blank",
+  "title": "Conflict",
+  "status": 409,
+  "detail": "A user with email 'ada@example.com' already exists",
+  "instance": "/users"
+}
+----
+
+Validation failures additionally carry a `fieldErrors` object mapping field
+name to message.

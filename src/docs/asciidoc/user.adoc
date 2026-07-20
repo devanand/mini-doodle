@@ -1,0 +1,35 @@
+== Users
+
+`POST /users` creates a user; `GET /users/{userId}` fetches one. Email must
+be unique - a duplicate returns `409 Conflict`.
+
+=== Create a user
+
+include::{snippets}/create-user/http-request.adoc[]
+include::{snippets}/create-user/http-response.adoc[]
+include::{snippets}/create-user/request-fields.adoc[]
+include::{snippets}/create-user/response-fields.adoc[]
+include::{snippets}/create-user/curl-request.adoc[]
+
+==== Duplicate email
+
+include::{snippets}/create-user-conflict/http-request.adoc[]
+include::{snippets}/create-user-conflict/http-response.adoc[]
+
+==== Validation failure
+
+include::{snippets}/create-user-validation-error/http-request.adoc[]
+include::{snippets}/create-user-validation-error/http-response.adoc[]
+
+=== Fetch a user
+
+include::{snippets}/get-user/http-request.adoc[]
+include::{snippets}/get-user/http-response.adoc[]
+include::{snippets}/get-user/path-parameters.adoc[]
+include::{snippets}/get-user/response-fields.adoc[]
+include::{snippets}/get-user/curl-request.adoc[]
+
+==== Not found
+
+include::{snippets}/get-user-not-found/http-request.adoc[]
+include::{snippets}/get-user-not-found/http-response.adoc[]
