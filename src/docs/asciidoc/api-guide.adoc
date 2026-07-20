@@ -19,6 +19,8 @@ include::user.adoc[]
 
 include::slot.adoc[]
 
+include::meeting.adoc[]
+
 == Error format
 
 All errors use RFC 7807 Problem Details (`application/problem+json`):

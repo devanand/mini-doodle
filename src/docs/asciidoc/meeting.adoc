@@ -1,0 +1,59 @@
+== Meetings
+
+A meeting books exactly one slot. Booking marks the slot BUSY; cancelling a
+meeting deletes it and frees the slot again - both operations happen in one
+transaction, so a meeting can never exist while its slot is FREE, and a slot
+can never be BUSY without a corresponding meeting.
+
+=== Book a meeting
+
+The organizer is derived from the slot's owner, not supplied by the client.
+Booking is rejected if the slot does not exist, or if it is already booked.
+
+include::{snippets}/book-meeting/http-request.adoc[]
+include::{snippets}/book-meeting/http-response.adoc[]
+include::{snippets}/book-meeting/request-fields.adoc[]
+include::{snippets}/book-meeting/response-fields.adoc[]
+include::{snippets}/book-meeting/curl-request.adoc[]
+
+==== Slot not found
+
+include::{snippets}/book-meeting-not-found/http-request.adoc[]
+include::{snippets}/book-meeting-not-found/http-response.adoc[]
+
+==== Slot already booked
+
+include::{snippets}/book-meeting-conflict/http-request.adoc[]
+include::{snippets}/book-meeting-conflict/http-response.adoc[]
+
+==== Validation failure
+
+include::{snippets}/book-meeting-validation-error/http-request.adoc[]
+include::{snippets}/book-meeting-validation-error/http-response.adoc[]
+
+=== Fetch a meeting
+
+include::{snippets}/get-meeting/http-request.adoc[]
+include::{snippets}/get-meeting/http-response.adoc[]
+include::{snippets}/get-meeting/path-parameters.adoc[]
+include::{snippets}/get-meeting/response-fields.adoc[]
+include::{snippets}/get-meeting/curl-request.adoc[]
+
+==== Not found
+
+include::{snippets}/get-meeting-not-found/http-request.adoc[]
+include::{snippets}/get-meeting-not-found/http-response.adoc[]
+
+=== Cancel a meeting
+
+Deletes the meeting and frees its slot back to FREE.
+
+include::{snippets}/cancel-meeting/http-request.adoc[]
+include::{snippets}/cancel-meeting/http-response.adoc[]
+include::{snippets}/cancel-meeting/path-parameters.adoc[]
+include::{snippets}/cancel-meeting/curl-request.adoc[]
+
+==== Not found
+
+include::{snippets}/cancel-meeting-not-found/http-request.adoc[]
+include::{snippets}/cancel-meeting-not-found/http-response.adoc[]

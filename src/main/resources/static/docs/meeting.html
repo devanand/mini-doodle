@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.18">
-<title>Users</title>
+<title>Meetings</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -441,32 +441,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_users">Users</h2>
+<h2 id="_meetings">Meetings</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>POST /users</code> creates a user; <code>GET /users/{userId}</code> fetches one. Email must
-be unique - a duplicate returns <code>409 Conflict</code>.</p>
+<p>A meeting books exactly one slot. Booking marks the slot BUSY; cancelling a
+meeting deletes it and frees the slot again - both operations happen in one
+transaction, so a meeting can never exist while its slot is FREE, and a slot
+can never be BUSY without a corresponding meeting.</p>
 </div>
 <div class="sect2">
-<h3 id="_create_a_user">Create a user</h3>
+<h3 id="_book_a_meeting">Book a meeting</h3>
+<div class="paragraph">
+<p>The organizer is derived from the slot&#8217;s owner, not supplied by the client.
+Booking is rejected if the slot does not exist, or if it is already booked.</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /users HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /meetings HTTP/1.1
 Content-Type: application/json
-Content-Length: 50
+Content-Length: 155
 Host: localhost:8080
 
-{"name":"Ada Lovelace","email":"ada@example.com"}</code></pre>
+{"slotId":"6cd46150-abff-4df4-8440-4256f4015ce2","title":"Planning sync","description":"Q3 roadmap","participantEmails":["a@example.com","b@example.com"]}</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 201 Created
-Location: /users/99703eea-29bb-4c22-ab06-e0e9273b5a63
+Location: http://localhost:8080/meetings/b0665205-45ad-413e-bbec-43c5fb831d99
 Content-Type: application/json
-Content-Length: 128
+Content-Length: 286
 
-{"id":"99703eea-29bb-4c22-ab06-e0e9273b5a63","name":"Ada Lovelace","email":"ada@example.com","createdAt":"2027-01-01T00:00:00Z"}</code></pre>
+{"id":"b0665205-45ad-413e-bbec-43c5fb831d99","slotId":"6cd46150-abff-4df4-8440-4256f4015ce2","organizerId":"52727875-f163-42f9-a0f2-08e4b7486482","title":"Planning sync","description":"Q3 roadmap","participantEmails":["b@example.com","a@example.com"],"createdAt":"2027-01-01T00:00:00Z"}</code></pre>
 </div>
 </div>
 <table class="tableblock frame-all grid-all stretch">
@@ -484,14 +490,24 @@ Content-Length: 128
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slotId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The slot to book. Must exist and be FREE.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Must not be blank</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Must be a valid, unique email address</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Optional</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>participantEmails</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Must contain at least one email address</p></td>
 </tr>
 </tbody>
 </table>
@@ -512,16 +528,31 @@ Content-Length: 128
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Generated user id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Generated meeting id</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slotId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Echoes the request</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>organizerId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The slot owner - not supplied by the client</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Echoes the request</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Echoes the request</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>participantEmails</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Echoes the request</p></td>
 </tr>
 <tr>
@@ -533,31 +564,53 @@ Content-Length: 128
 </table>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl 'http://localhost:8080/users' -i -X POST \
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl 'http://localhost:8080/meetings' -i -X POST \
     -H 'Content-Type: application/json' \
-    -d '{"name":"Ada Lovelace","email":"ada@example.com"}
+    -d '{"slotId":"6cd46150-abff-4df4-8440-4256f4015ce2","title":"Planning sync","description":"Q3 roadmap","participantEmails":["a@example.com","b@example.com"]}
 '</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_duplicate_email">Duplicate email</h4>
+<h4 id="_slot_not_found">Slot not found</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /users HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /meetings HTTP/1.1
 Content-Type: application/json
-Content-Length: 50
+Content-Length: 112
 Host: localhost:8080
 
-{"name":"Ada Lovelace","email":"ada@example.com"}</code></pre>
+{"slotId":"f2f99687-ad1e-49fc-9144-94d62627811d","title":"Planning sync","participantEmails":["a@example.com"]}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+Content-Length: 129
+
+{"detail":"No slot found with id 'f2f99687-ad1e-49fc-9144-94d62627811d'","instance":"/meetings","status":404,"title":"Not Found"}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_slot_already_booked">Slot already booked</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /meetings HTTP/1.1
+Content-Type: application/json
+Content-Length: 112
+Host: localhost:8080
+
+{"slotId":"6fb6e69d-e93e-4f27-aab6-aa5013e805ea","title":"Planning sync","participantEmails":["a@example.com"]}</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 409 Conflict
 Content-Type: application/problem+json
-Content-Length: 115
+Content-Length: 95
 
-{"detail":"A user with email 'ada@example.com' already exists","instance":"/users","status":409,"title":"Conflict"}</code></pre>
+{"detail":"This slot is already booked","instance":"/meetings","status":409,"title":"Conflict"}</code></pre>
 </div>
 </div>
 </div>
@@ -565,30 +618,30 @@ Content-Length: 115
 <h4 id="_validation_failure">Validation failure</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /users HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">POST /meetings HTTP/1.1
 Content-Type: application/json
-Content-Length: 35
+Content-Length: 36
 Host: localhost:8080
 
-{"name":"","email":"not-an-email"}</code></pre>
+{"title":"","participantEmails":[]}</code></pre>
 </div>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 400 Bad Request
 Content-Type: application/problem+json
-Content-Length: 174
+Content-Length: 200
 
-{"detail":"Validation failed","instance":"/users","status":400,"title":"Bad Request","fieldErrors":{"email":"must be a well-formed email address","name":"must not be blank"}}</code></pre>
+{"detail":"Validation failed","instance":"/meetings","status":400,"title":"Bad Request","fieldErrors":{"title":"must not be blank","participantEmails":"must not be empty","slotId":"must not be null"}}</code></pre>
 </div>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_fetch_a_user">Fetch a user</h3>
+<h3 id="_fetch_a_meeting">Fetch a meeting</h3>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /users/bcf7c852-371c-4d0b-bccc-78e8d3e74a1e HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /meetings/10f8dda1-db79-40c4-96d7-8fb7a1f3091f HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -596,13 +649,13 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 200 OK
 Content-Type: application/json
-Content-Length: 128
+Content-Length: 270
 
-{"id":"bcf7c852-371c-4d0b-bccc-78e8d3e74a1e","name":"Ada Lovelace","email":"ada@example.com","createdAt":"2027-01-01T00:00:00Z"}</code></pre>
+{"id":"10f8dda1-db79-40c4-96d7-8fb7a1f3091f","slotId":"af6d3448-0990-4876-bdce-0b52ba57a520","organizerId":"bb328f38-3cf6-4d7d-822c-bc7534caec87","title":"Planning sync","description":"Q3 roadmap","participantEmails":["a@example.com"],"createdAt":"2027-01-01T00:00:00Z"}</code></pre>
 </div>
 </div>
 <table class="tableblock frame-all grid-all stretch">
-<caption class="title">Table 1. /users/{userId}</caption>
+<caption class="title">Table 1. /meetings/{id}</caption>
 <colgroup>
 <col style="width: 50%;">
 <col style="width: 50%;">
@@ -615,8 +668,8 @@ Content-Length: 128
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>userId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">The user&#8217;s id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The meeting&#8217;s id</p></td>
 </tr>
 </tbody>
 </table>
@@ -637,17 +690,32 @@ Content-Length: 128
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User id</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meeting id</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>name</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>slotId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The booked slot</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>email</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>organizerId</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">User email</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The slot owner</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>title</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meeting title</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>description</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Meeting description</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>participantEmails</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Invited participants</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>createdAt</code></p></td>
@@ -658,14 +726,14 @@ Content-Length: 128
 </table>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl 'http://localhost:8080/users/bcf7c852-371c-4d0b-bccc-78e8d3e74a1e' -i -X GET</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl 'http://localhost:8080/meetings/10f8dda1-db79-40c4-96d7-8fb7a1f3091f' -i -X GET</code></pre>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_not_found">Not found</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /users/5f468262-a0ab-4642-ab9e-35dc8bd7a875 HTTP/1.1
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">GET /meetings/e6740b2a-6946-4851-a1d7-fed5005c4822 HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -673,9 +741,68 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 404 Not Found
 Content-Type: application/problem+json
-Content-Length: 163
+Content-Length: 169
 
-{"detail":"No user found with id '5f468262-a0ab-4642-ab9e-35dc8bd7a875'","instance":"/users/5f468262-a0ab-4642-ab9e-35dc8bd7a875","status":404,"title":"Not Found"}</code></pre>
+{"detail":"No meeting found with id 'e6740b2a-6946-4851-a1d7-fed5005c4822'","instance":"/meetings/e6740b2a-6946-4851-a1d7-fed5005c4822","status":404,"title":"Not Found"}</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cancel_a_meeting">Cancel a meeting</h3>
+<div class="paragraph">
+<p>Deletes the meeting and frees its slot back to FREE.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /meetings/2632c58c-1992-440b-885a-d52ee58b670c HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 204 No Content</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. /meetings/{id}</caption>
+<colgroup>
+<col style="width: 50%;">
+<col style="width: 50%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Parameter</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The meeting to cancel</p></td>
+</tr>
+</tbody>
+</table>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">$ curl 'http://localhost:8080/meetings/2632c58c-1992-440b-885a-d52ee58b670c' -i -X DELETE</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_not_found_2">Not found</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">DELETE /meetings/d13f5cd8-750f-4c48-961d-0f42c8ceb511 HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-http" data-lang="http">HTTP/1.1 404 Not Found
+Content-Type: application/problem+json
+Content-Length: 169
+
+{"detail":"No meeting found with id 'd13f5cd8-750f-4c48-961d-0f42c8ceb511'","instance":"/meetings/d13f5cd8-750f-4c48-961d-0f42c8ceb511","status":404,"title":"Not Found"}</code></pre>
 </div>
 </div>
 </div>
@@ -686,7 +813,7 @@ Content-Length: 163
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2026-07-20 21:31:06 +0200
+Last updated 2026-07-20 23:23:05 +0200
 </div>
 </div>
 </body>
