@@ -38,3 +38,7 @@ out/
 
 ### mac finder metadata ###
 .DS_Store
+
+
+### Environment ###
+.env
