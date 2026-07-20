@@ -1,0 +1,84 @@
+== Slots
+
+=== Create a slot
+
+A slot is created with a start time and a duration; the end time is derived
+by the server. Creation is rejected if the start time is in the past, if the
+range is invalid, if the owner does not exist, or if the range overlaps an
+existing slot for that owner.
+
+include::{snippets}/create-slot/http-request.adoc[]
+include::{snippets}/create-slot/http-response.adoc[]
+include::{snippets}/create-slot/request-fields.adoc[]
+include::{snippets}/create-slot/response-fields.adoc[]
+include::{snippets}/create-slot/curl-request.adoc[]
+
+==== Overlap conflict
+
+Two slots for the same owner may not overlap. This is enforced both at
+validation time (`NoOverlapRule`) and, since the validation check and the
+insert are not atomic, again by a database exclusion constraint - see the
+README's design notes for why both layers exist.
+
+include::{snippets}/create-slot-conflict/http-request.adoc[]
+include::{snippets}/create-slot-conflict/http-response.adoc[]
+
+=== Query availability
+
+Returns a user's slots within a required time window, optionally filtered by
+status.
+
+include::{snippets}/get-availability/http-request.adoc[]
+include::{snippets}/get-availability/http-response.adoc[]
+include::{snippets}/get-availability/query-parameters.adoc[]
+include::{snippets}/get-availability/response-fields.adoc[]
+include::{snippets}/get-availability/curl-request.adoc[]
+
+==== Bounds
+
+The window may not exceed 100 days, and results are capped at 500 slots,
+ordered ascending by start time. Both are stated in `400 Bad Request` errors
+when violated. See the README for the reasoning and the cursor-pagination
+upgrade path this leaves open.
+
+=== Modify a slot
+
+Only permitted while the slot is FREE - a booked slot must be cancelled
+first (see the meeting endpoints). The same past-time, range, and overlap
+rules apply as on creation.
+
+include::{snippets}/modify-slot/http-request.adoc[]
+include::{snippets}/modify-slot/http-response.adoc[]
+include::{snippets}/modify-slot/path-parameters.adoc[]
+include::{snippets}/modify-slot/request-fields.adoc[]
+include::{snippets}/modify-slot/response-fields.adoc[]
+include::{snippets}/modify-slot/curl-request.adoc[]
+
+==== Not found
+
+include::{snippets}/modify-slot-not-found/http-request.adoc[]
+include::{snippets}/modify-slot-not-found/http-response.adoc[]
+
+==== Overlap conflict
+
+include::{snippets}/modify-slot-conflict/http-request.adoc[]
+include::{snippets}/modify-slot-conflict/http-response.adoc[]
+
+=== Delete a slot
+
+Only permitted while the slot is FREE.
+
+include::{snippets}/delete-slot/http-request.adoc[]
+include::{snippets}/delete-slot/http-response.adoc[]
+include::{snippets}/delete-slot/path-parameters.adoc[]
+include::{snippets}/delete-slot/curl-request.adoc[]
+
+==== Not found
+
+include::{snippets}/delete-slot-not-found/http-request.adoc[]
+include::{snippets}/delete-slot-not-found/http-response.adoc[]
+
+==== Already booked
+
+include::{snippets}/delete-slot-conflict/http-request.adoc[]
+include::{snippets}/delete-slot-conflict/http-response.adoc[]

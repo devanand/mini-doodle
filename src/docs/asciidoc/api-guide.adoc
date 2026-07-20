@@ -17,6 +17,8 @@ here, is in the project README.
 
 include::user.adoc[]
 
+include::slot.adoc[]
+
 == Error format
 
 All errors use RFC 7807 Problem Details (`application/problem+json`):
