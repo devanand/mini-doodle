@@ -163,17 +163,13 @@ Or skip the docs and exercise the API directly:
 Each script is self-contained (creates its own prerequisite data) and can
 be run independently against a running instance.
 
-Two more scripts prove the concurrency guarantees under real load rather
-than just the happy path:
-
+One more script proves the meeting double-booking guarantee under real
+load rather than just the happy path:
 ```
-./scripts/race-test-slot.sh
 ./scripts/race-test-meeting.sh
 ```
 
-`race-test-slot.sh` fires N simultaneous overlapping slot creations for
-the same owner and asserts exactly one succeeds; `race-test-meeting.sh`
-fires N simultaneous requests to book the same slot and asserts exactly
+This fires N simultaneous requests to book the same slot and asserts exactly
 one succeeds. See "Concurrency" below for what each is actually proving.
 
 ## Architecture decisions
@@ -225,8 +221,12 @@ either one commits.
 check that gives clients a fast, meaningful `409` in the common case, but
 it reads before it writes. A PostgreSQL exclusion constraint
 (`EXCLUDE USING gist`, on `owner_id` and a `tstzrange` of the slot's time
-range) is what actually guarantees the invariant - proved under real
-concurrent load by `scripts/race-test-slot.sh`.
+range) is what actually guarantees the invariant - unlike the meeting
+double-booking race below, this one has no dedicated script proving it
+under concurrent load; the constraint's correctness rests on the
+exclusion-constraint semantics themselves plus the unit-level
+constraint-translation test, not a fired-concurrent-requests proof. See
+Known Limitations.
 
 **Double-booking the same slot.** `TimeSlot` carries a `@Version` column;
 `SlotService.markBusy` and the meeting insert happen in one transaction,
@@ -323,6 +323,13 @@ simultaneous HTTP requests can).
   Its logic is exercised indirectly through both of its real call sites
   (`SlotService`, `MeetingPersistenceAdapter`), covering both the match
   and no-match branches.
+- **No concurrency-load proof for the slot-overlap constraint.**
+  `race-test-meeting.sh` proves the `meetings.slot_id` race under real
+  simultaneous requests; the equivalent for `no_overlapping_slots_per_owner`
+  does not exist. The constraint itself is sound (exclusion constraints are
+  a well-established PostgreSQL mechanism for exactly this, and the
+  identical mechanism did get proven under load for `meeting`'s race), but
+  it's asserted rather than proven under load for `slot` specifically.
 
 ## Scaling
 
