@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 /**
  * HTTP boundary for the meeting bounded context. Depends only on
@@ -40,11 +39,7 @@ class MeetingController {
     ResponseEntity<MeetingResponse> book(@Valid @RequestBody BookMeetingRequest request) {
         Meeting meeting = bookMeetingUseCase.book(request.toCommand());
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(meeting.getId())
-                .toUri();
-
+        URI location = URI.create("/meetings/" + meeting.getId());
         return ResponseEntity.created(location).body(MeetingResponse.from(meeting));
     }
 

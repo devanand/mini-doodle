@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 class MeetingPersistenceAdapter implements MeetingRepositoryPort {
-    private static final String SLOT_ID_UNIQUE_CONSTRAINT = "uk_meetings_slot_id"; // must match Flyway migration
+    private static final String SLOT_ID_UNIQUE_CONSTRAINT = "meetings_slot_id_key"; // Postgres default name - column has no explicit CONSTRAINT clause in V1
 
     private final MeetingJpaRepository meetingJpaRepository;
 

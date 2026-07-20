@@ -6,9 +6,9 @@ import com.doodle.scheduler.meeting.domain.Meeting;
  * Translates between the domain Meeting and the JPA-specific
  * MeetingJpaEntity. Package-private - only MeetingPersistenceAdapter, in
  * this same package, calls it. Nothing here validates anything: toEntity
- * only ever receives an already-schedule()d Meeting, and toDomain only
- * ever receives an already-persisted row, so reconstruct() (no checks) is
- * the correct domain factory to call on the way back.
+ * only ever receives an already-persisted row, so reconstruct() is the
+ * correct domain factory to call on the way back - it runs the same
+ * invariant checks the constructor always runs.
  */
 final class MeetingMapper {
 
